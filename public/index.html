@@ -1,0 +1,136 @@
+<!-- Referenced: https://www.w3schools.com/html/html_responsive.asp-->
+<!DOCTYPE html>
+<html>
+<head>
+  <h1>Hello Everyone</h1>
+
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js'>
+</script>
+
+</head>
+
+
+<body>
+  <div class = "main">
+  <button id = "wordButton" onclick="showWord()">WORD</button>
+    <p id="word"></p>
+  <button id = "imgButton" onclick="showImage()">IMAGE</button>
+ 
+ <h2> Make a Button</h2>
+  <button id = "butButton" onclick="addButton()">BUTTON</button>
+ 
+ <h2> Upload and Display Image</h2>
+  <input type="file" id = "uploadButton" onchange="showUserImage(event)">
+  <div id = "uploadedImageContainer"></div>
+
+<h2>Prompt Bar and Token Buttons</h2>
+  <input type="text" id="textInput">
+  <button onclick="addWord('dog')">Add Dog</button>
+  <button onclick="addWord('cat')">Add Cat</button>
+  <button onclick="addWord('bear')">Add Bear</button>
+  <button onclick="removeWord()">Remove Word</button>
+  
+<h2>Generate List</h2>
+  <input type="button" value="Generate" onclick="generateList()">
+  <ul id="wordList"></ul>
+
+<h2>Stable Diffusion</h2>
+<button id = "SD" onclick ="myButtonFunction()">STABLEDIFFUSION</button>
+
+</div>
+<script>
+  function showWord(){
+    var word = "BRUH!";
+    var wordElement = document.getElementById("word");
+    wordElement.textContent = word;
+  }  
+
+  function showImage(){
+    var image = "images/scream.jpg" 
+    var imageElement = document.createElement("img");
+    imageElement.src=image;
+    imageElement.style.width = "300px";
+    document.body.appendChild(imageElement);
+  }
+
+  function addButton(){
+    var newButton = document.createElement("button");
+    newButton.textContent="BUTTON2";
+    document.body.appendChild(newButton);
+  }
+
+  function showUserImage(event){
+    var file=event.target.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var uploadedImage = document.createElement("img");
+      uploadedImage.src = e.target.result;
+      uploadedImage.style.width = "300px";
+        document.getElementById("uploadedImageContainer").appendChild(uploadedImage);
+      };
+      reader.readAsDataURL(file);
+  }
+
+   function addWord(word) {
+      var textInput = document.getElementById("textInput");
+      textInput.value += word + " ";
+    }
+
+    function removeWord() {
+      var textInput = document.getElementById("textInput");
+      var words = textInput.value.trim().split(" ");
+      var lastWord = words.pop();
+      textInput.value = words.join(" ");
+    }
+
+ function generateList() {
+      var wordList = document.getElementById("wordList");
+      wordList.innerHTML = "";
+      for (var i = 0; i < promptWords.length; i++) {
+        var listItem = document.createElement("li");
+        listItem.textContent = promptWords[i];
+        wordList.appendChild(listItem);
+      }
+    }
+
+function myButtonFunction(){
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      var raw = JSON.stringify({
+        "key": "V5HzrBaNlbBCXAsiRlJeCabek3BqAZQUPPlbc1W33jWln0eiGf9D2ebuC24o",
+        "prompt": "a car with wings diving into the ocean",
+        "negative_prompt": null, //make it so its user input, maybe as a function or a string
+        "width": "512",
+        "height": "512",
+        "samples": "1",
+        "num_inference_steps": "20",
+        "seed": null,
+        "guidance_scale": 7.5,
+        "safety_checker": "yes",
+        "multi_lingual": "no",
+        "panorama": "no",
+        "self_attention": "no",
+        "upscale": "no",
+        "embeddings_model": null,
+        "webhook": null,
+        "track_id": null
+      });
+      var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow'
+      };
+      fetch("https://stablediffusionapi.com/api/v3/text2img", requestOptions)
+        .then(function (response){
+          console.log("Response:", response);
+          return response.json()
+        })
+        .then(function (data) {
+          console.log(data.output[0]) //data.output[0] >> the image url once it is done loading!
+        })
+        .catch(error => console.log('error', error));
+    }
+//once the image is loaded, data.output prints the url for it, how can we print the image from the url adding it back to the HTML script 
+</script>
+
