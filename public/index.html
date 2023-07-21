@@ -1,183 +1,167 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <h1>Hello Everyone</h1>
-
-  <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js'></script>
-
-  <style>
- .gallery-container {
-  width: 600px; /* Adjusted width to accommodate 3 images */
-  height: 300px;
-  overflow: hidden;
-  border: 1px solid #ccc;
-}
-
-.gallery-images {
-  display: flex; /* Added to create a flex container */
-  width: fit-content; /* Adjusted to fit the container width */
-  white-space: nowrap;
-}
-
-.gallery-images img {
-  width: 33.33%; /* Adjusted width to display 3 images */
-  height: 100%;
-  object-fit: cover;
-  vertical-align: top;
-}
-
-.gallery-arrows {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-}
-
-.gallery-arrow {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  padding: 0 10px;
-}
-
-.gallery-prev-arrow {
-  transform: rotate(180deg);
-}
-
-
-  </style>
-  <meta name="viewport" content = "width=device-width, inital-scale=1.0">
-  <title>Scroll Gallery</title>
-  <link rel="stylesheet" href="style.css">
+    <title>IT3I</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        body{
+            margin:0;
+            padding:0;
+        }
+        .custom-container{
+            max-width:100%;
+            margin:0;
+            padding-left:0;
+            padding-right:0;
+        }
+        .moodBoard {
+            border-radius: 20px;
+            border: 5px solid #00008B;
+            background: #ADD8E6;
+            padding: 20px;
+            min-height: 40vh;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .moodboard-column{
+            margin:0;
+            padding:0;
+        }
+        .tokens {
+            border-radius: 20px;
+            border: 5px solid #008000;
+            background: #90EE90;
+            padding: 10px;
+            height: 15vw;
+            margin-bottom: 5px;
+        }
+        .promptBar{
+            border-radius:20px;
+            border: 5px solid black;
+            height: 10vh;
+        }
+        .image {
+            height: 30vh;
+            padding: 50px;
+            border: 3px solid black;
+            margin-top: 20px;
+        }
+        .uploaded-image-container {
+            position: relative;
+            width: 20%;
+            margin-right: 20px;
+            margin-bottom: 40px;
+            overflow: hidden;
+        }
+        .uploaded-image {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border:3px solid black;
+        }
+        .delete-button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 50%;
+            font-size: 12px;
+        }
+        .saved {
+            height: 50vh;
+            padding: 5px;
+            border: 3px solid black;
+        }
+         input[type="file"] {
+            display:none;
+        }
+        .choose-file-button-container{
+            display:flex;
+            align-items:center;
+            position: absolute;
+            justify-content: center;
+        }
+        .choose-file-button{
+            width: 40px;
+            height: 40px;
+            background-color: #008000;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+        .choose-file-text{
+            margin-left:10px;
+            font-size:16px;
+        }
+    </style>
 </head>
 
 <body>
+    <div class="container">
+        <div class="row">
+            <div class="col-6"; margin: 0px;>
+                Moodboard
+                <div class="moodBoard" id="moodBoardContainer"></div>
+                <div class="choose-file-button-container">
+                <label for="imageInput" class="choose-file-button">+</label>
+                <input type="file" id="imageInput" accept="image/*" onchange="showUserImage(event)">
+                <div class="choose-file-text">click to add your images</div>
+             </div>
+            </div>
+            <div class="col-4">
+                Textbox
+                <div class="tokens" style="margin-bottom: 20px;"> </div>
+                <div class="promptBar"></div>
+                <div class="image"></div>
+            </div>
 
-  <div class="main">
-    <button id="wordButton" onclick="showWord()">WORD</button>
-    <p id="word"></p>
-    <button id="imgButton" onclick="showImage()">IMAGE</button>
-
-    <h2>Make a Button</h2>
-    <button id="butButton" onclick="addButton()">BUTTON</button>
-
-    <h2>Upload and Display Image</h2>
-    <input type="file" id="uploadButton" onchange="showUserImage(event)">
-    <div id="uploadedImageContainer"></div>
-
-    <h2>Prompt Bar and Token Buttons</h2>
-    <input type="text" id="textInput">
-    <button onclick="addWord('dog')">Add Dog</button>
-    <button onclick="addWord('cat')">Add Cat</button>
-    <button onclick="addWord('bear')">Add Bear</button>
-    <button onclick="removeWord()">Remove Word</button>
-
-    <h2>Generate List</h2>
-    <input type="button" value="Generate" onclick="generateList()">
-    <ul id="wordList"></ul>
-
-    <h2>Stable Diffusion</h2>
-    <button id="SD" onclick="myButtonFunction()">STABLEDIFFUSION</button>
-
-    <h2>Image Gallery</h2>
-    <div class="gallery-container">
-      <div class="gallery-images">
-        <img src="images/bunny.jpg" alt="Image 1">
-        <img src="images/BWbunny.jpg" alt="Image 2">
-        <img src="images/scream.jpg" alt="Image 3">
-        <img src="images/sepiabunny.jpg" alt="Image 4">
-      </div>
-
- <div class="gallery-arrows">
-  <button class="gallery-arrow gallery-prev-arrow" onclick="slideGallery(-1)">&#8249;</button>
-  <button class="gallery-arrow gallery-next-arrow" onclick="slideGallery(1)">&#8250;</button>
-</div>
-  
-</div>
+            <div class="col-2";margin: 0px;>
+                Saved
+                <div class="saved"></div>
+            </div>
+        </div>
+    </div>
 
     <script>
-      var galleryContainer = document.querySelector(".gallery-container");
-      var galleryImages = document.querySelector(".gallery-images");
-      var scrollAmount = 0;
-      var scrollStep = 200;
+        function showUserImage(event) {
+            var file = event.target.files[0];
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var imageContainer = document.createElement("div");
+                imageContainer.classList.add("uploaded-image-container");
+                
+                var uploadedImage = document.createElement("img");
+                uploadedImage.src = e.target.result;
+                uploadedImage.classList.add("uploaded-image");
+                imageContainer.appendChild(uploadedImage);
+                
+                var deleteButton = document.createElement("div");
+                deleteButton.classList.add("delete-button");
+                deleteButton.innerHTML = "X";
+                deleteButton.addEventListener("click", function() {
+                    imageContainer.remove();
+                });
+                imageContainer.appendChild(deleteButton);
 
-      galleryContainer.addEventListener("wheel", function(event) {
-        event.preventDefault();
-        var delta = Math.sign(event.deltaY);
-        scrollAmount += delta * scrollStep;
-        scrollAmount = Math.max(0, Math.min(scrollAmount, galleryImages.scrollWidth - galleryContainer.offsetWidth));
-        galleryImages.style.transform = "translateX(-" + scrollAmount + "px)";
-      });
-
-      function showWord() {
-        var word = "BRUH!";
-        var wordElement = document.getElementById("word");
-        wordElement.textContent = word;
-      }
-
-      function showImage() {
-        var image = "images/scream.jpg";
-        var imageElement = document.createElement("img");
-        imageElement.src = image;
-        imageElement.style.width = "300px";
-        document.body.appendChild(imageElement);
-      }
-
-      function addButton() {
-        var newButton = document.createElement("button");
-        newButton.textContent = "BUTTON2";
-        document.body.appendChild(newButton);
-      }
-
-      function showUserImage(event) {
-        var file = event.target.files[0];
-        var reader = new FileReader();
-        reader.onload = function (e) {
-          var uploadedImage = document.createElement("img");
-          uploadedImage.src = e.target.result;
-          uploadedImage.style.width = "300px";
-          document.getElementById("uploadedImageContainer").appendChild(uploadedImage);
-        };
-        reader.readAsDataURL(file);
-      }
-
-      function addWord(word) {
-        var textInput = document.getElementById("textInput");
-        textInput.value += word + " ";
-      }
-
-      function removeWord() {
-        var textInput = document.getElementById("textInput");
-        var words = textInput.value.trim().split(" ");
-        var lastWord = words.pop();
-        textInput.value = words.join(" ");
-      }
-
-      function generateList() {
-        var wordList = document.getElementById("wordList");
-        wordList.innerHTML = "";
-        var promptWords = document.getElementById("textInput").value.trim().split(/\s+/);
-        for (var i = 0; i < promptWords.length; i++) {
-          var listItem = document.createElement("li");
-          listItem.textContent = promptWords[i];
-          wordList.appendChild(listItem);
+                document.getElementById("moodBoardContainer").appendChild(imageContainer);
+            };
+            reader.readAsDataURL(file);
         }
-      }
-
-  function slideGallery(direction) {
-  var containerWidth = galleryContainer.offsetWidth;
-  var numVisibleImages = 3; 
-  var imageWidth = containerWidth / numVisibleImages; 
-  var maxScrollAmount = (galleryImages.children.length - numVisibleImages) * imageWidth; 
-
-  var scrollIncrement = imageWidth * direction;
-  scrollAmount += scrollIncrement;
-  scrollAmount = Math.max(0, Math.min(scrollAmount, maxScrollAmount));
-  galleryImages.style.transform = "translateX(-" + scrollAmount + "px)";
-}
-
-
     </script>
-  </div>
 </body>
 </html>
+
