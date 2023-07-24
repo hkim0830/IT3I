@@ -19,6 +19,7 @@ const router = express.Router();
 const app = express();
 const path = require('path');
 
+const textToImage = require('./replicateTTI');
 //specify that we want to run our website on 'http://localhost:8000/'
 const host = 'localhost';
 const port = 8000;
@@ -26,7 +27,8 @@ const port = 8000;
 var publicPath = path.join(__dirname, 'public'); //get the path to use our "public" folder where we stored our html, css, images, etc
 app.use(express.static(publicPath));  //tell express to use that folder
 
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 //here's where we specify what to send to users that connect to our web server...
 //if there's no url extension, it will show "index.html"
@@ -45,6 +47,15 @@ app.get('/c', function (req, res) {
     res.sendFile(publicPath + '/c.html');
 });
 
+app.post('/imagegenrequest', (req, res) =>{
+    var prompt = JSON.stringify(req.body);
+    console.log('Our SERVER just received from user: ' + prompt + '. loading response...\n');
+    textToImage(prompt).then(function(response)
+    {
+        console.log('Success! SERVER received the following image from replicate, and is sending to user: ' + response + '\n');
+        res.status(200).send(response);
+    })
+});
 
 //run this server by entering "node App.js" using your command line. 
    app.listen(port, () => {

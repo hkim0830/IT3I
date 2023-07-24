@@ -5,6 +5,7 @@
     <title>IT3I</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js'></script>
     <style>
         body {
             margin: 0;
@@ -206,7 +207,41 @@
         </div>
     </div>
 
+    <div id="imageResultContainer"></div>
+  <input type="text" id="promptInputBar" value="astronaut riding a horse"/>
+  <button id='generate-button'>GENERATE IMAGE</button>
+</div>
+
     <script>
+        
+        $('#generate-button').click(function() { 
+        console.log("generating...");
+        //-- insert code that will show a loading animation here -- //
+        //grab the user's prompt from the text input bar
+        var userPrompt = document.getElementById("promptInputBar").value;
+        console.log (userPrompt);
+        //using  jQuery ajax call to send a "post" request to the server, with the URL extension /imagegenrequest. The code to handle this post request is in App.js.
+        $.ajax({
+              contentType: "application/json; charset=utf-8",
+              type: 'POST',
+              url: 'http://localhost:8000/imagegenrequest',
+              data: JSON.stringify({
+                'prompt': userPrompt
+              }),
+              success: processImageResult
+          });
+      });
+      // This function is called when the "generate- button" click function is completed. 
+      function processImageResult(data){
+        //insert code that will hide the loading animation here...
+        var imageURL= data[0];
+        console.log("client has received: " + imageURL);
+        var imageElement = document.createElement("img");
+        imageElement.src = imageURL;
+        imageElement.style.width = "300px";
+        document.getElementById("imageResultContainer").appendChild(imageElement);
+      }
+
         function showUserImage(event) {
                 var file = event.target.files[0];
             var reader = new FileReader();
@@ -261,6 +296,12 @@
                 promptText += word.textContent + " ";
             });
             console.log("Prompt text:", promptText);
+        }
+
+        function addCustom(event){
+            if(event.key==="Enter"){
+                addWordToPrompt(event.target.value)
+            }
         }
     </script>
 </body>
