@@ -3,31 +3,38 @@
 
 <head>
     <title>IT3I</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <style>
-        body{
-            margin:0;
-            padding:0;
+        body {
+            margin: 0;
+            padding: 0;
         }
-        .custom-container{
-            max-width:100%;
-            margin:0;
-            padding-left:0;
-            padding-right:0;
+
+        .custom-container {
+            max-width: 100%;
+            margin: 0;
+            padding-left: 0;
+            padding-right: 0;
         }
+
+        .moodBoard-container {
+            max-height: 90vh;
+            overflow-y: auto;
+            padding-left: 10px;
+        }
+
         .moodBoard {
             border-radius: 20px;
             border: 5px solid #00008B;
             background: #ADD8E6;
             padding: 20px;
-            min-height: 40vh;
+            height: 90vh;
             display: flex;
             flex-wrap: wrap;
+            overflow-y: auto;
         }
-        .moodboard-column{
-            margin:0;
-            padding:0;
-        }
+
         .tokens {
             border-radius: 20px;
             border: 5px solid #008000;
@@ -36,17 +43,38 @@
             height: 15vw;
             margin-bottom: 5px;
         }
-        .promptBar{
-            border-radius:20px;
+
+        .promptBar {
+            border-radius: 20px;
             border: 5px solid black;
             height: 10vh;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            overflow-y:auto;
         }
+
+        .promptWord {
+            border-radius: 20px;
+            border: 2px solid #008000;
+            background: #90EE90;
+            margin: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .promptWord:hover {
+            background: #8bc34a;
+        }
+
         .image {
-            height: 30vh;
+            height: 47vh;
             padding: 50px;
             border: 3px solid black;
             margin-top: 20px;
         }
+
         .uploaded-image-container {
             position: relative;
             width: 20%;
@@ -76,9 +104,10 @@
             font-size: 12px;
         }
         .saved {
-            height: 50vh;
+            height: 90vh;
             padding: 5px;
             border: 3px solid black;
+            background: #D3D3D3;
         }
          input[type="file"] {
             display:none;
@@ -107,29 +136,70 @@
             margin-left:10px;
             font-size:16px;
         }
+        .token-container {
+            cursor: pointer;
+            padding: 2px; 
+            font-size: 10px; 
+        }
+        .token {
+            border-radius: 0;
+            border: 2px solid #008000; 
+            background-color: #90EE90; 
+            padding: 5px 10px; 
+            width: 80px;
+            white-space: normal;
+        }
+        .promptBar-dragover{
+            border-color:red;
+        }
+        .promptBar-container {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+        }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="row">
-            <div class="col-6"; margin: 0px;>
+    <div class="container-fluid">
+        <div class="row ">
+            <div class="col-6 pl-0">
                 Moodboard
-                <div class="moodBoard" id="moodBoardContainer"></div>
+                <div class="moodBoard-container">
+                    <div class="moodBoard" id="moodBoardContainer"></div>
+                </div>
                 <div class="choose-file-button-container">
-                <label for="imageInput" class="choose-file-button">+</label>
-                <input type="file" id="imageInput" accept="image/*" onchange="showUserImage(event)">
-                <div class="choose-file-text">click to add your images</div>
-             </div>
+                    <label for="imageInput" class="choose-file-button">+</label>
+                    <input type="file" id="imageInput" accept="image/*" onchange="showUserImage(event)">
+                    <div class="choose-file-text">click to add your images</div>
+                </div>
             </div>
-            <div class="col-4">
+            <div class="col-4" style="margin:0px;">
                 Textbox
-                <div class="tokens" style="margin-bottom: 20px;"> </div>
-                <div class="promptBar"></div>
+                <div class="tokens" style="margin-bottom: 20px;">
+                    <!-- Sample token buttons -->
+                    <div class="token-container">
+                        <div class="token" onclick="addWordToPrompt('white rabbit')">white rabbit</div>
+                    </div>
+                    <div class="token-container">
+                        <div class="token" onclick="addWordToPrompt('with a rose')">with a rose</div>
+                    </div>
+                    <div class="token-container">
+                        <div class="token" onclick="addWordToPrompt('handsome')">handsome</div>
+                    </div>
+                    <div class="token-container">
+                        <div class="token" onclick="addWordToPrompt('beautiful')">beautiful</div>
+                    </div>
+                </div>
+                <!-- Modify the promptBar container with the new class -->
+                <div class="promptBar" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <div class="promptBar-container" id="promptBarContainer"></div>
+                </div>
                 <div class="image"></div>
+                <button onclick="submitPrompt()">Submit</button>
             </div>
 
-            <div class="col-2";margin: 0px;>
+            <div class="col-2 pr-0">
                 Saved
                 <div class="saved"></div>
             </div>
@@ -138,17 +208,15 @@
 
     <script>
         function showUserImage(event) {
-            var file = event.target.files[0];
+                var file = event.target.files[0];
             var reader = new FileReader();
             reader.onload = function (e) {
                 var imageContainer = document.createElement("div");
                 imageContainer.classList.add("uploaded-image-container");
-                
                 var uploadedImage = document.createElement("img");
                 uploadedImage.src = e.target.result;
                 uploadedImage.classList.add("uploaded-image");
                 imageContainer.appendChild(uploadedImage);
-                
                 var deleteButton = document.createElement("div");
                 deleteButton.classList.add("delete-button");
                 deleteButton.innerHTML = "X";
@@ -156,12 +224,46 @@
                     imageContainer.remove();
                 });
                 imageContainer.appendChild(deleteButton);
-
                 document.getElementById("moodBoardContainer").appendChild(imageContainer);
             };
             reader.readAsDataURL(file);
         }
+
+        function addWordToPrompt(word) {
+            var promptWord = document.createElement("div");
+            promptWord.classList.add("promptWord");
+            promptWord.textContent = word;
+            promptWord.onclick = function () {
+                this.remove();
+            };
+
+            document.getElementById("promptBarContainer").appendChild(promptWord);
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+            event.target.classList.add("promptBar-dragover");
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            event.target.classList.remove("promptBar-dragover");
+            var data = event.dataTransfer.getData("text/plain");
+            var token = document.getElementById(data);
+            addWordToPrompt(token.textContent);
+        }
+
+        function submitPrompt() {
+            var promptBarWords = document.querySelectorAll(".promptWord");
+            var promptText = "";
+
+            promptBarWords.forEach(function (word) {
+                promptText += word.textContent + " ";
+            });
+            console.log("Prompt text:", promptText);
+        }
     </script>
 </body>
+
 </html>
 
