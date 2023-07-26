@@ -19,6 +19,7 @@
             padding-right: 0;
         }
 
+        /* Moodboard */
         .moodBoard-container {
             max-height: 90vh;
             overflow-y: auto;
@@ -35,46 +36,6 @@
             flex-wrap: wrap;
             overflow-y: auto;
         }
-
-        .tokens {
-            border-radius: 20px;
-            border: 5px solid #008000;
-            background: #90EE90;
-            padding: 10px;
-            height: 15vw;
-            margin-bottom: 5px;
-        }
-
-        .promptBar {
-            border-radius: 20px;
-            border: 5px solid black;
-            height: 10vh;
-            padding: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            overflow-y:auto;
-        }
-
-        .promptWord {
-            border-radius: 20px;
-            border: 2px solid #008000;
-            background: #90EE90;
-            margin: 5px;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-
-        .promptWord:hover {
-            background: #8bc34a;
-        }
-
-        .image {
-            height: 47vh;
-            border: 3px solid black;
-            margin-top: 20px;
-        }
-
         .uploaded-image-container {
             position: relative;
             width: 20%;
@@ -103,6 +64,69 @@
             border-radius: 50%;
             font-size: 12px;
         }
+        /* Tokens */
+
+        .tokens {
+            border-radius: 20px;
+            border: 5px solid #008000;
+            background: #90EE90;
+            padding: 10px;
+            height: 15vw;
+            margin-bottom: 5px;
+        }
+        .token-container {
+            cursor: pointer;
+            padding: 2px; 
+            font-size: 10px; 
+        }
+        .token {
+            border-radius: 0;
+            border: 2px solid #008000; 
+            background-color: #90EE90; 
+            padding: 5px 10px; 
+            width: 80px;
+            white-space: normal;
+        }
+        .promptBar-dragover{
+            border-color:red;
+        }
+        .promptBar-container {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .promptBar {
+            border-radius: 20px;
+            border: 5px solid black;
+            height: 10vh;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            overflow-y:auto;
+        }
+
+        .promptWord {
+            border-radius: 20px;
+            border: 2px solid #008000;
+            background: #90EE90;
+            margin: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .promptWord:hover {
+            background: #8bc34a;
+        }
+
+        /* Generated Image */
+        .image {
+            height: 47vh;
+            border: 3px solid black;
+            margin-top: 20px;
+        }
+
         .saved {
             height: 90vh;
             padding: 5px;
@@ -135,27 +159,6 @@
         .choose-file-text{
             margin-left:10px;
             font-size:16px;
-        }
-        .token-container {
-            cursor: pointer;
-            padding: 2px; 
-            font-size: 10px; 
-        }
-        .token {
-            border-radius: 0;
-            border: 2px solid #008000; 
-            background-color: #90EE90; 
-            padding: 5px 10px; 
-            width: 80px;
-            white-space: normal;
-        }
-        .promptBar-dragover{
-            border-color:red;
-        }
-        .promptBar-container {
-            display: flex;
-            flex-wrap: wrap;
-            width: 100%;
         }
 
     </style>
@@ -214,7 +217,8 @@
     </div>
 
     <script>
-$(document).ready(function(){ 
+
+        /* Image Generation */
         function getPromptBarText() {
         var promptBarWords = document.querySelectorAll(".promptWord");
         var promptText = "";
@@ -279,6 +283,7 @@ $(document).ready(function(){
         }
     });
   
+        /* Prompt */
         document.getElementById("customPromptInput").addEventListener("keypress", function(event) {
         if(event.key === "Enter"){
         addWordToPrompt(event.target.value);
@@ -298,12 +303,25 @@ $(document).ready(function(){
             var token = document.getElementById(data);
             addWordToPrompt(token.textContent);
         }
+        
         function addCustom(event){
             if(event.key==="Enter"){
                 addWordToPrompt(event.target.value)
             }
         }
-  });
+
+        function addWordToPrompt(word) {
+            var promptWord = document.createElement("div");
+            promptWord.classList.add("promptWord");
+            promptWord.textContent = word;
+            promptWord.onclick = function () {
+                this.remove();
+            };
+
+            document.getElementById("promptBarContainer").appendChild(promptWord);
+        }
+
+
         function showUserImage(event) {
         var file = event.target.files[0];
         var reader = new FileReader();
@@ -330,53 +348,45 @@ $(document).ready(function(){
         reader.readAsDataURL(file);
         }
 
-        function addWordToPrompt(word) {
-            var promptWord = document.createElement("div");
-            promptWord.classList.add("promptWord");
-            promptWord.textContent = word;
-            promptWord.onclick = function () {
-                this.remove();
-            };
-
-            document.getElementById("promptBarContainer").appendChild(promptWord);
-        }
-        /*    $('generate-tokens-button').click(function() {
-    var images = document.querySelectorAll(".uploaded-image");
-    images.forEach(function(image) {
-        var base64Image = image.getAttribute('data-base64');  // Get the base64 data from the custom attribute
-        $.ajax({
+       /*Token Generation */
+        $('#generate-tokens-button').click(function() {
+            var images = document.querySelectorAll(".uploaded-image");
+            images.forEach(function(image) {
+            var imageBaseImage = image.getAttribute('data-base64');  // Get the base64 data from the custom attribute
+            $.ajax({
             contentType: "application/json; charset=utf-8",
-            type: 'POST',
-            url: 'http://localhost:8000/tokengenrequest',
-            data: JSON.stringify({
-                'image': base64Image
-            }),
-            success: processTokens
-        });
-    });
-});
+                type: 'POST',
+                url: 'http://localhost:8000/tokengenrequest',
+                data: JSON.stringify({
+                'image': imageBase64
+                        }),
+                success: processTokens
+                    });
+                });
+            });
+        
         function processTokens(tokens) {
-        var tokensBox = document.querySelector(".tokens");
-        tokens.forEach(function(tokenString) {
-        var tokenWords = tokenString.split(' ');
-        tokenWords.forEach(function(token) {
-            var tokenElement = document.createElement("div");
-            tokenElement.classList.add("token");
-            tokenElement.textContent = token;
-            tokensBox.appendChild(tokenElement);
-        });
-        });
-        }
+            var tokensBox = document.querySelector(".tokens");
+            tokens.forEach(function(tokenString) {
+            var tokenWords = tokenString.split(' ');
+            tokenWords.forEach(function(token) {
+                var tokenElement = document.createElement("div");
+                tokenElement.classList.add("token");
+                tokenElement.textContent = token;
+                tokensBox.appendChild(tokenElement);
+            });
+            });
+            }
 
-    /* imageToText(imageBase64).then(function(response) {
-        console.log('Success! SERVER received the following tokens from replicate, and is sending to user: ' + response + '\n');
-        res.status(200).send(response);
-        }).catch(function(error) {
-        console.error('An error occurred:', error);
-        res.status(500).send({ error: 'An error occurred while processing your request.' });
-        }); */
+        imageToText(imageBase64).then(function(response) {
+                console.log('Success! SERVER received the following tokens from replicate, and is sending to user: ' + response + '\n');
+                res.status(200).send(response);
+                }).catch(function(error) {
+                console.error('An error occurred:', error);
+                res.status(500).send({ error: 'An error occurred while processing your request.' });
+                }); 
 
-        /*const imageToText = require('./replicateITT');*/
+
     </script>
 </body>
 </html>
