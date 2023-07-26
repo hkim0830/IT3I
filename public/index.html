@@ -71,7 +71,6 @@
 
         .image {
             height: 47vh;
-            padding: 50px;
             border: 3px solid black;
             margin-top: 20px;
         }
@@ -158,6 +157,7 @@
             flex-wrap: wrap;
             width: 100%;
         }
+
     </style>
 </head>
 
@@ -168,6 +168,7 @@
                 Moodboard
                 <div class="moodBoard-container">
                     <div class="moodBoard" id="moodBoardContainer"></div>
+                    <button id='generate-tokens-button'>GENERATE TOKENS</button>
                 </div>
                 <div class="choose-file-button-container">
                     <label for="imageInput" class="choose-file-button">+</label>
@@ -178,7 +179,7 @@
             <div class="col-4" style="margin:0px;">
                 Textbox
                 <div class="tokens" style="margin-bottom: 20px;">
-                    <!-- Sample token buttons -->
+
                     <div class="token-container">
                         <div class="token" onclick="addWordToPrompt('white rabbit')">white rabbit</div>
                     </div>
@@ -194,11 +195,16 @@
                 </div>
                 <!-- Modify the promptBar container with the new class -->
                 <div class="promptBar" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <div class="promptBar-container" id="promptBarContainer"></div>
+                    <input id="customPromptInput" type="text" placeholder="Type your own">
+                    <div class="promptBar-container" id="promptBarContainer">
+                    </div>
                 </div>
-                <div class="image"></div>
-                <button onclick="submitPrompt()">Submit</button>
-            </div>
+                  <button id='generate-button'>GENERATE IMAGE</button>
+                <div class="image" id="imageBox">
+                    <div id="loading" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">Loading...</div> 
+                </div>
+                <button id='save-button'>SAVE IMAGE</button>
+        </div>
 
             <div class="col-2 pr-0">
                 Saved
@@ -207,18 +213,28 @@
         </div>
     </div>
 
-    <div id="imageResultContainer"></div>
-  <input type="text" id="promptInputBar" value="astronaut riding a horse"/>
-  <button id='generate-button'>GENERATE IMAGE</button>
-</div>
-
     <script>
-        
+$(document).ready(function(){ 
+        function getPromptBarText() {
+        var promptBarWords = document.querySelectorAll(".promptWord");
+        var promptText = "";
+        promptBarWords.forEach(function (word) {
+        promptText += word.textContent + " ";
+        });
+        return promptText;
+        }       
+      
+        let isGenerating = false;
         $('#generate-button').click(function() { 
         console.log("generating...");
+        if (isGenerating){
+            return;
+        }
+        isGenerating = true;
         //-- insert code that will show a loading animation here -- //
         //grab the user's prompt from the text input bar
-        var userPrompt = document.getElementById("promptInputBar").value;
+        document.getElementById('loading').style.display = 'block'; 
+        var userPrompt = getPromptBarText();
         console.log (userPrompt);
         //using  jQuery ajax call to send a "post" request to the server, with the URL extension /imagegenrequest. The code to handle this post request is in App.js.
         $.ajax({
@@ -230,50 +246,45 @@
               }),
               success: processImageResult
           });
-      });
+        
+        document.getElementById("customPromptInput").addEventListener("keypress", function(event) {
+        if(event.key === "Enter"){
+        addWordToPrompt(event.target.value);
+        event.target.value = "";  // Clear the input box
+        }   
+        });
+    });
       // This function is called when the "generate- button" click function is completed. 
       function processImageResult(data){
         //insert code that will hide the loading animation here...
+        document.getElementById('loading').style.display='none';
         var imageURL= data[0];
         console.log("client has received: " + imageURL);
         var imageElement = document.createElement("img");
         imageElement.src = imageURL;
-        imageElement.style.width = "300px";
-        document.getElementById("imageResultContainer").appendChild(imageElement);
+        imageElement.style.width = "100%";
+        imageElement.style.height = "100%";
+        imageElement.style.objectFit = "fill";
+        document.getElementById("imageBox").innerHTML = '';
+        document.getElementById("imageBox").appendChild(imageElement);
+        isGenerating = false;
       }
 
-        function showUserImage(event) {
-                var file = event.target.files[0];
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                var imageContainer = document.createElement("div");
-                imageContainer.classList.add("uploaded-image-container");
-                var uploadedImage = document.createElement("img");
-                uploadedImage.src = e.target.result;
-                uploadedImage.classList.add("uploaded-image");
-                imageContainer.appendChild(uploadedImage);
-                var deleteButton = document.createElement("div");
-                deleteButton.classList.add("delete-button");
-                deleteButton.innerHTML = "X";
-                deleteButton.addEventListener("click", function() {
-                    imageContainer.remove();
-                });
-                imageContainer.appendChild(deleteButton);
-                document.getElementById("moodBoardContainer").appendChild(imageContainer);
-            };
-            reader.readAsDataURL(file);
+        $('#save-button').click(function() { 
+        var imageBox = document.getElementById("imageBox");
+        var savedBox = document.getElementById("savedBox"); // Assume this is the id of your .saved container
+        if (imageBox.hasChildNodes()) {
+            var image = imageBox.firstChild.cloneNode(true);
+            savedBox.appendChild(image);
         }
-
-        function addWordToPrompt(word) {
-            var promptWord = document.createElement("div");
-            promptWord.classList.add("promptWord");
-            promptWord.textContent = word;
-            promptWord.onclick = function () {
-                this.remove();
-            };
-
-            document.getElementById("promptBarContainer").appendChild(promptWord);
-        }
+    });
+  
+        document.getElementById("customPromptInput").addEventListener("keypress", function(event) {
+        if(event.key === "Enter"){
+        addWordToPrompt(event.target.value);
+        event.target.value = "";  // Clear the input box
+        }   
+        });
 
         function allowDrop(event) {
             event.preventDefault();
@@ -287,24 +298,49 @@
             var token = document.getElementById(data);
             addWordToPrompt(token.textContent);
         }
-
-        function submitPrompt() {
-            var promptBarWords = document.querySelectorAll(".promptWord");
-            var promptText = "";
-
-            promptBarWords.forEach(function (word) {
-                promptText += word.textContent + " ";
-            });
-            console.log("Prompt text:", promptText);
-        }
-
         function addCustom(event){
             if(event.key==="Enter"){
                 addWordToPrompt(event.target.value)
             }
         }
+  });
+        function showUserImage(event) {
+        var file = event.target.files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+        var imageContainer = document.createElement("div");
+        imageContainer.classList.add("uploaded-image-container");
+        var uploadedImage = document.createElement("img");
+        uploadedImage.src = e.target.result;
+        uploadedImage.classList.add("uploaded-image");
+        uploadedImage.setAttribute('data-base64', e.target.result);
+        imageContainer.appendChild(uploadedImage);
+        var base64String = e.target.result;
+        console.log(base64String);
+        //replicateITT.generateTokens(base64String);
+        var deleteButton = document.createElement("div");
+        deleteButton.classList.add("delete-button");
+        deleteButton.innerHTML = "X";
+        deleteButton.addEventListener("click", function() {
+            imageContainer.remove();
+        });
+        imageContainer.appendChild(deleteButton);
+        document.getElementById("moodBoardContainer").appendChild(imageContainer);
+        };
+        reader.readAsDataURL(file);
+        }
+
+        function addWordToPrompt(word) {
+            var promptWord = document.createElement("div");
+            promptWord.classList.add("promptWord");
+            promptWord.textContent = word;
+            promptWord.onclick = function () {
+                this.remove();
+            };
+
+            document.getElementById("promptBarContainer").appendChild(promptWord);
+        }
     </script>
 </body>
-
 </html>
 
