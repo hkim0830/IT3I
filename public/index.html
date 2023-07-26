@@ -340,6 +340,43 @@ $(document).ready(function(){
 
             document.getElementById("promptBarContainer").appendChild(promptWord);
         }
+        /*    $('generate-tokens-button').click(function() {
+    var images = document.querySelectorAll(".uploaded-image");
+    images.forEach(function(image) {
+        var base64Image = image.getAttribute('data-base64');  // Get the base64 data from the custom attribute
+        $.ajax({
+            contentType: "application/json; charset=utf-8",
+            type: 'POST',
+            url: 'http://localhost:8000/tokengenrequest',
+            data: JSON.stringify({
+                'image': base64Image
+            }),
+            success: processTokens
+        });
+    });
+});
+        function processTokens(tokens) {
+        var tokensBox = document.querySelector(".tokens");
+        tokens.forEach(function(tokenString) {
+        var tokenWords = tokenString.split(' ');
+        tokenWords.forEach(function(token) {
+            var tokenElement = document.createElement("div");
+            tokenElement.classList.add("token");
+            tokenElement.textContent = token;
+            tokensBox.appendChild(tokenElement);
+        });
+        });
+        }
+
+    /* imageToText(imageBase64).then(function(response) {
+        console.log('Success! SERVER received the following tokens from replicate, and is sending to user: ' + response + '\n');
+        res.status(200).send(response);
+        }).catch(function(error) {
+        console.error('An error occurred:', error);
+        res.status(500).send({ error: 'An error occurred while processing your request.' });
+        }); */
+
+        /*const imageToText = require('./replicateITT');*/
     </script>
 </body>
 </html>
