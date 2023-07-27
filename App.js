@@ -31,7 +31,7 @@ const firebaseConfig = {
 const db = initializeApp(firebaseConfig);
 const storage = getStorage(db);
 
-const serviceAccount = require('./it3i-394100-e431fabfb3d8.json');
+/*const serviceAccount = require('./it3i-394100-e431fabfb3d8.json');*/
 
 
 const express = require('express');

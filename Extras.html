@@ -71,10 +71,9 @@
             border: 5px solid #008000;
             background: #90EE90;
             padding: 10px;
-            height: 15vw;
+            height: 200px;
             margin-bottom: 5px;
             overflow-y: auto;
-            height: 200px;
             display: flex;
             flex-wrap: wrap;
             align-items: flex-start;
@@ -223,22 +222,15 @@
     </div>
 
     <script>
-        var processedImages = []; 
-        /* 
-        an array to hold entries for all of our processed images, in this format:
-            {image : `an image string in base64`, 
-             name : `filename, ex anya.jpeg`, 
-             tokenString : `string of tokens, ex, beautiful, cute, rabbit`}
-            */
 
         /* Image Generation */
         function getPromptBarText() {
-            var promptBarWords = document.querySelectorAll(".promptWord");
-            var promptText = "";
-            promptBarWords.forEach(function (word) {
-            promptText += word.textContent + " ";
-            });
-            return promptText;
+        var promptBarWords = document.querySelectorAll(".promptWord");
+        var promptText = "";
+        promptBarWords.forEach(function (word) {
+        promptText += word.textContent + " ";
+        });
+        return promptText;
         }       
       
         let isGenerating = false;
@@ -250,7 +242,7 @@
             isGenerating = true;
             //-- insert code that will show a loading animation here -- //
             //grab the user's prompt from the text input bar
-            /*document.getElementById('loading').style.display = 'block';*/ 
+            document.getElementById('loading').style.display = 'block'; 
             var userPrompt = getPromptBarText();
             console.log (userPrompt);
             //using  jQuery ajax call to send a "post" request to the server, with the URL extension /imagegenrequest. The code to handle this post request is in App.js.
@@ -274,7 +266,7 @@
       // This function is called when the "generate- button" click function is completed. 
       function processImageResult(data){
         //insert code that will hide the loading animation here...
-        //document.getElementById('loading').style.display='none';
+        document.getElementById('loading').style.display='none';
         var imageURL= data[0];
         console.log("client has received: " + imageURL);
         var imageElement = document.createElement("img");
@@ -334,117 +326,198 @@
             document.getElementById("promptBarContainer").appendChild(promptWord);
         }
 
-        //set up filereader for reading uploaded images and adding to webpage. 
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            //sends image as base64string over to the processing function
-            processNewImage(reader.result, reader.fileName);
-
-            //add image to the webpage - thought, maybe wait until the processing is over to actually show it? 
-            var imageContainer = document.createElement("div");
-            imageContainer.classList.add("uploaded-image-container");
-            var uploadedImage = document.createElement("img");
-            uploadedImage.src = e.target.result;
-            uploadedImage.classList.add("uploaded-image");
-            uploadedImage.setAttribute('data-base64', e.target.result);
-            imageContainer.appendChild(uploadedImage);
-
-
-            var deleteButton = document.createElement("div");
-            deleteButton.classList.add("delete-button");
-            deleteButton.innerHTML = "X";
-            deleteButton.addEventListener("click", function() {
-                imageContainer.remove();
-            });
-            imageContainer.appendChild(deleteButton);
-            document.getElementById("moodBoardContainer").appendChild(imageContainer);
-        };
 
         function showUserImage(event) {
-            var file = event.target.files[0];
-            reader.fileName = file.name //store the file's name in reader
-            reader.readAsDataURL(file);
+        var file = event.target.files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+        var imageContainer = document.createElement("div");
+        imageContainer.classList.add("uploaded-image-container");
+        var uploadedImage = document.createElement("img");
+        uploadedImage.src = e.target.result;
+        uploadedImage.classList.add("uploaded-image");
+        uploadedImage.setAttribute('data-base64', e.target.result);
+        imageContainer.appendChild(uploadedImage);
+        var base64String = e.target.result;
+        console.log(base64String);
+        //replicateITT.generateTokens(base64String);
+        var deleteButton = document.createElement("div");
+        deleteButton.classList.add("delete-button");
+        deleteButton.innerHTML = "X";
+        deleteButton.addEventListener("click", function() {
+            imageContainer.remove();
+        });
+        imageContainer.appendChild(deleteButton);
+        document.getElementById("moodBoardContainer").appendChild(imageContainer);
+        };
+        reader.readAsDataURL(file);
         }
 
-
-        function processNewImage(newImage, fileName){
-            //console.log(newestImage);
-
-            var newEntry = {image : `${newImage}`, name : `${fileName}`, tokenString : ``}; //create a JSON entry
-
-            //upload the newest image to server. 
-            $.ajax({
-                contentType: "application/json; charset=utf-8",
-                    type: 'POST',
-                    url: 'http://localhost:8000/imageUpload',
-                    data: 
-                        JSON.stringify(newEntry), 
-                    success: function(response){
-                        newEntry.tokenString = response;
-                        processedImages.push(newEntry);
-                        console.log("pushing: " + newEntry.name);//push to our array of JSON entries 
-                    }
-            });
-        }
-
-       /* -- Token Generation -- */
+       /*Token Generation */
         $('#generate-tokens-button').click(function() {
-            for (let i = 0; i < processedImages.length; i++) {
-                var imageEntry = processedImages[i];
-                console.log("filename: " + imageEntry.name);
-               // console.log("image: " + imageEntry.image);
-                console.log("tokenString: " + imageEntry.tokenString);
-                var tokens = imageEntry.tokenString.split(',');
-                var tokensBox = document.querySelector(".tokens");
-                tokens.forEach(function(token) {
-                    var tokenElement = document.createElement("div");
-                    tokenElement.classList.add("token-container");
-                    var tokenContent = document.createElement("div");
-                    tokenContent.classList.add("token");
-                    tokenContent.textContent = token.trim();  // Remove extra spaces
-                    tokenContent.setAttribute("onclick", "addWordToPrompt('" + token.trim() + "')");
-                    tokenElement.appendChild(tokenContent);
-                    tokensBox.appendChild(tokenElement);
+            
+            var images = [`http://placekitten.com/g/200/300`,`https://placekitten.com/100/300`,`https://placekitten.com/200/400`]
+            console.log("ajax call?");
+            $.ajax({
+            contentType: "application/json; charset=utf-8",
+                type: 'POST',
+                url: 'http://localhost:8000/tokengenrequest',
+                data: JSON.stringify({
+                    'images': images
+                        }),
+                success: processTokens
+                    });
                 });
+        
+ function processTokens(tokens) {
+    var tokensBox = document.querySelector(".tokens");
+    tokensBox.innerHTML = ''; // Clear the tokens box
+
+    var tokenCounts = {}; // Map of token to count
+    tokens.forEach(function(tokenString) {
+        var tokenWords = tokenString.split(' ');
+        tokenWords.forEach(function(token) {
+            if (token in tokenCounts) {
+                tokenCounts[token] += 1;
+            } else {
+                tokenCounts[token] = 1;
             }
         });
+    });
 
+    // Convert tokenCounts to an array of [token, count] pairs
+    var tokenCountPairs = Object.entries(tokenCounts);
 
-       /*$('#generate-tokens-button').click(function() {
-            //cycle through the images we've finished processing and process their tokens for adding to the token bank.  
-            //thought: hide/grey out this button while images are still processing? 
+    // Sort the pairs by count, in descending order
+    tokenCountPairs.sort(function(a, b) {
+        return b[1] - a[1];
+    });
 
-            console.log("current list of images: ")
-            for (let i = 0; i < processedImages.length; i++){
-                console.log("filename: " + processedImages[i].name);
-                console.log("image: " + processedImages[i].image);
-                console.log("tokenString: " + processedImages[i].tokenString);
-            }
-        }) */       
-    
-        function processTokens(tokens) {
-            var tokensBox = document.querySelector(".tokens");
-            tokens.forEach(function(tokenString) {
-            var tokenWords = tokenString.split(' ');
-            tokenWords.forEach(function(token) {
-                var tokenElement = document.createElement("div");
-                tokenElement.classList.add("token");
-                tokenElement.textContent = token;
-                tokensBox.appendChild(tokenElement);
-            });
-            });
-            }
+    // Take the top 10 most frequent tokens
+    var topTokens = tokenCountPairs.slice(0, 10).map(function(pair) {
+        return pair[0]; // We only need the token, not the count
+    });
 
-        /*imageToText(imageBase64).then(function(response) {
-                console.log('Success! SERVER received the following tokens from replicate, and is sending to user: ' + response + '\n');
-                res.status(200).send(response);
-                }).catch(function(error) {
-                console.error('An error occurred:', error);
-                res.status(500).send({ error: 'An error occurred while processing your request.' });
-                }); */
+    topTokens.forEach(function(token) {
+        var tokenContainerElement = document.createElement("div");
+        tokenContainerElement.classList.add("token-container");
 
+        var tokenElement = document.createElement("div");
+        tokenElement.classList.add("token");
+        tokenElement.textContent = token;
+
+        tokenElement.onclick = function() {
+            addWordToPrompt(token);
+        };
+
+        tokenContainerElement.appendChild(tokenElement);
+        tokensBox.appendChild(tokenContainerElement);
+    });
+}
 
     </script>
 </body>
 </html>
+
+
+/*
+Node + Express Example code for CS160 Summer 2022
+Prepared by Shm Garanganao Almeda 
+
+Code referenced from: 
+https://www.digitalocean.com/community/tutorials/how-to-create-a-web-server-in-node-js-with-the-http-module"
+https://expressjs.com/en/starter/hello-world.html
+https://codeforgeek.com/render-html-file-expressjs/
+https://stackoverflow.com/questions/32257736/app-use-express-serve-multiple-html
+
+Photo Credits:
+Bunny by Satyabratasm on Unsplash <https://unsplash.com/photos/u_kMWN-BWyU>
+*/
+
+//Node modules to *require*
+//if these cause errors, be sure you've installed them, ex: 'npm install express'
+const express = require('express');
+const router = express.Router();
+const app = express();
+const path = require('path');
+
+const imageToText = require('./replicateITT');
+const textToImage = require('./replicateTTI');
+//specify that we want to run our website on 'http://localhost:8000/'
+const host = 'localhost';
+const port = 8000;
+
+var publicPath = path.join(__dirname, 'public'); //get the path to use our "public" folder where we stored our html, css, images, etc
+app.use(express.static(publicPath));  //tell express to use that folder
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+//here's where we specify what to send to users that connect to our web server...
+//if there's no url extension, it will show "index.html"
+router.get("/", function (req, res) {
+    res.sendFile(path.join(__dirname, "/"));
+});
+
+//depending on what url extension the user navigates to, send them the respective html file. 
+app.get('/a', function (req, res) {
+    res.sendFile(publicPath + '/a.html');
+});
+app.get('/b', function (req, res) {
+    res.sendFile(publicPath + '/b.html');
+});
+app.get('/c', function (req, res) {
+    res.sendFile(publicPath + '/c.html');
+});
+
+app.post('/imagegenrequest', (req, res) =>{
+    var prompt = JSON.stringify(req.body);
+    console.log('Our SERVER just received from user: ' + prompt + '. loading response...\n');
+    textToImage(prompt).then(function(response)
+    {
+        console.log('Success! SERVER received the following image from replicate, and is sending to user: ' + response + '\n');
+        res.status(200).send(response);
+    })
+});
+
+const axios = require('axios'); 
+
+app.post('/tokengenrequest', async (req, res) => {
+    console.log ('hello');
+    var imageURLs = req.body.images;
+    console.log('Our SERVER just received from user: ' + imageURLs);
+    var responses = [];
+    for (let imageURL of imageURLs) {
+        console.log ('processing each image now');
+        let imageBase64 = await urlToBase64(imageURL);
+        console.log ('processing each image now2');
+        let response = await imageToText(imageBase64);
+
+        responses.push(response);
+        console.log('Success! SERVER received the following tokens from replicate, and is sending to user: ' + response);
+    }
+    res.status(200).send(responses);
+});
+
+async function urlToBase64(url) {
+    let response = await axios.get(url, { responseType: 'arraybuffer' });
+    let base64 = Buffer.from(response.data, 'binary').toString('base64');
+    return base64;
+}
+
+/*app.post('/tokengenrequest', (req, res) =>{
+    console.log("huzzah!!");
+    var imageBase64 = req.body.image;
+    console.log('Our SERVER just received from user: ' + imageBase64 + '. loading response...\n');
+    imageToText(imageBase64).then(function(response)
+    {
+        console.log('Success! SERVER received the following tokens from replicate, and is sending to user: ' + response + '\n');
+        res.status(200).send(response);
+    })
+});*/
+
+//run this server by entering "node App.js" using your command line. 
+   app.listen(port, () => {
+     console.log(`Server is running on http://${host}:${port}`);
+   });
 
