@@ -1,4 +1,4 @@
-/*const Replicate = require('replicate');
+const Replicate = require('replicate');
 const rep = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
@@ -10,7 +10,7 @@ module.exports = async function (prompt){
   console.log("replicate module has finished running, and is sending: " + output + "\n");
   return output;
 };
-*/
+/*
 
 module.exports = async function (imageBase64){
   console.log("Replicate module has received image");
@@ -25,4 +25,4 @@ module.exports = async function (imageBase64){
     console.error("Error occurred in Replicate:", error);
     throw error;  // Or handle the error in a way that makes sense for your application
   }
-};
+};*/

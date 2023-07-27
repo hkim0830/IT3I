@@ -230,25 +230,25 @@
       
         let isGenerating = false;
         $('#generate-button').click(function() { 
-        console.log("generating...");
-        if (isGenerating){
-            return;
-        }
-        isGenerating = true;
-        //-- insert code that will show a loading animation here -- //
-        //grab the user's prompt from the text input bar
-        document.getElementById('loading').style.display = 'block'; 
-        var userPrompt = getPromptBarText();
-        console.log (userPrompt);
-        //using  jQuery ajax call to send a "post" request to the server, with the URL extension /imagegenrequest. The code to handle this post request is in App.js.
-        $.ajax({
-              contentType: "application/json; charset=utf-8",
-              type: 'POST',
-              url: 'http://localhost:8000/imagegenrequest',
-              data: JSON.stringify({
-                'prompt': userPrompt
-              }),
-              success: processImageResult
+            console.log("generating...");
+            if (isGenerating){
+                return;
+            }
+            isGenerating = true;
+            //-- insert code that will show a loading animation here -- //
+            //grab the user's prompt from the text input bar
+            document.getElementById('loading').style.display = 'block'; 
+            var userPrompt = getPromptBarText();
+            console.log (userPrompt);
+            //using  jQuery ajax call to send a "post" request to the server, with the URL extension /imagegenrequest. The code to handle this post request is in App.js.
+            $.ajax({
+                  contentType: "application/json; charset=utf-8",
+                  type: 'POST',
+                  url: 'http://localhost:8000/imagegenrequest',
+                  data: JSON.stringify({
+                    'prompt': userPrompt
+                  }),
+                  success: processImageResult
           });
         
         document.getElementById("customPromptInput").addEventListener("keypress", function(event) {
@@ -350,20 +350,22 @@
 
        /*Token Generation */
         $('#generate-tokens-button').click(function() {
+            
             var images = document.querySelectorAll(".uploaded-image");
-            images.forEach(function(image) {
-            var imageBaseImage = image.getAttribute('data-base64');  // Get the base64 data from the custom attribute
+            //images.forEach(function(image) {
+            //var imageBaseImage = image.getAttribute('data-base64');  // Get the base64 data from the custom attribute
+
+            console.log("ajax call?");
             $.ajax({
             contentType: "application/json; charset=utf-8",
                 type: 'POST',
                 url: 'http://localhost:8000/tokengenrequest',
                 data: JSON.stringify({
-                'image': imageBase64
+                    'image': `http://placekitten.com/g/200/300`
                         }),
                 success: processTokens
                     });
                 });
-            });
         
         function processTokens(tokens) {
             var tokensBox = document.querySelector(".tokens");
@@ -378,13 +380,13 @@
             });
             }
 
-        imageToText(imageBase64).then(function(response) {
+        /*imageToText(imageBase64).then(function(response) {
                 console.log('Success! SERVER received the following tokens from replicate, and is sending to user: ' + response + '\n');
                 res.status(200).send(response);
                 }).catch(function(error) {
                 console.error('An error occurred:', error);
                 res.status(500).send({ error: 'An error occurred while processing your request.' });
-                }); 
+                }); */
 
 
     </script>

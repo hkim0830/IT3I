@@ -19,7 +19,7 @@ const router = express.Router();
 const app = express();
 const path = require('path');
 
-const ImageToText = require('./replicateITT');
+const imageToText = require('./replicateITT');
 const textToImage = require('./replicateTTI');
 //specify that we want to run our website on 'http://localhost:8000/'
 const host = 'localhost';
@@ -59,6 +59,7 @@ app.post('/imagegenrequest', (req, res) =>{
 });
 
 app.post('/tokengenrequest', (req, res) =>{
+    console.log("huzzah!!");
     var imageBase64 = req.body.image;
     console.log('Our SERVER just received from user: ' + imageBase64 + '. loading response...\n');
     imageToText(imageBase64).then(function(response)
