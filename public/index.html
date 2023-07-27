@@ -217,15 +217,22 @@
     </div>
 
     <script>
+        var processedImages = []; 
+        /* 
+        an array to hold entries for all of our processed images, in this format:
+            {image : `an image string in base64`, 
+             name : `filename, ex anya.jpeg`, 
+             tokenString : `string of tokens, ex, beautiful, cute, rabbit`}
+            */
 
         /* Image Generation */
         function getPromptBarText() {
-        var promptBarWords = document.querySelectorAll(".promptWord");
-        var promptText = "";
-        promptBarWords.forEach(function (word) {
-        promptText += word.textContent + " ";
-        });
-        return promptText;
+            var promptBarWords = document.querySelectorAll(".promptWord");
+            var promptText = "";
+            promptBarWords.forEach(function (word) {
+            promptText += word.textContent + " ";
+            });
+            return promptText;
         }       
       
         let isGenerating = false;
@@ -321,51 +328,87 @@
             document.getElementById("promptBarContainer").appendChild(promptWord);
         }
 
-
-        function showUserImage(event) {
-        var file = event.target.files[0];
+        //set up filereader for reading uploaded images and adding to webpage. 
         var reader = new FileReader();
         reader.onload = function (e) {
-        var imageContainer = document.createElement("div");
-        imageContainer.classList.add("uploaded-image-container");
-        var uploadedImage = document.createElement("img");
-        uploadedImage.src = e.target.result;
-        uploadedImage.classList.add("uploaded-image");
-        uploadedImage.setAttribute('data-base64', e.target.result);
-        imageContainer.appendChild(uploadedImage);
-        var base64String = e.target.result;
-        console.log(base64String);
-        //replicateITT.generateTokens(base64String);
-        var deleteButton = document.createElement("div");
-        deleteButton.classList.add("delete-button");
-        deleteButton.innerHTML = "X";
-        deleteButton.addEventListener("click", function() {
-            imageContainer.remove();
-        });
-        imageContainer.appendChild(deleteButton);
-        document.getElementById("moodBoardContainer").appendChild(imageContainer);
+            //sends image as base64string over to the processing function
+            processNewImage(reader.result, reader.fileName);
+
+            //add image to the webpage - thought, maybe wait until the processing is over to actually show it? 
+            var imageContainer = document.createElement("div");
+            imageContainer.classList.add("uploaded-image-container");
+            var uploadedImage = document.createElement("img");
+            uploadedImage.src = e.target.result;
+            uploadedImage.classList.add("uploaded-image");
+            uploadedImage.setAttribute('data-base64', e.target.result);
+            imageContainer.appendChild(uploadedImage);
+
+
+            var deleteButton = document.createElement("div");
+            deleteButton.classList.add("delete-button");
+            deleteButton.innerHTML = "X";
+            deleteButton.addEventListener("click", function() {
+                imageContainer.remove();
+            });
+            imageContainer.appendChild(deleteButton);
+            document.getElementById("moodBoardContainer").appendChild(imageContainer);
         };
-        reader.readAsDataURL(file);
+
+        function showUserImage(event) {
+            var file = event.target.files[0];
+            reader.fileName = file.name //store the file's name in reader
+            reader.readAsDataURL(file);
         }
 
-       /*Token Generation */
+
+        function processNewImage(newImage, fileName){
+            //console.log(newestImage);
+
+            var newEntry = {image : `${newImage}`, name : `${fileName}`, tokenString : ``}; //create a JSON entry
+
+            //upload the newest image to server. 
+            $.ajax({
+                contentType: "application/json; charset=utf-8",
+                    type: 'POST',
+                    url: 'http://localhost:8000/imageUpload',
+                    data: 
+                        JSON.stringify(newEntry), 
+                    success: function(response){
+                        newEntry.tokenString = response;
+                        processedImages.push(newEntry);
+                        console.log("pushing: " + newEntry.name);//push to our array of JSON entries 
+                    }
+            });
+        }
+
+       /* -- Token Generation -- */
         $('#generate-tokens-button').click(function() {
-            
-            var images = document.querySelectorAll(".uploaded-image");
+            //cycle through the images we've finished processing and process their tokens for adding to the token bank.  
+            //thought: hide/grey out this button while images are still processing? 
+
+            console.log("current list of images: ")
+            for (let i = 0; i < processedImages.length; i++){
+                console.log("filename: " + processedImages[i].name);
+                console.log("image: " + processedImages[i].image);
+                console.log("tokenString: " + processedImages[i].tokenString);
+            }
+            //we don't need any of the below stuff anymore, because we do the processing as soon as an image is uploaded, rather than waiting for the button click. I left it commented for your reference, but we should just delete it. 
+            //var images = document.querySelectorAll(".uploaded-image");
+            //var images = ["placekittenurl1.com123123", "placekitten.comasdfksf"]
             //images.forEach(function(image) {
             //var imageBaseImage = image.getAttribute('data-base64');  // Get the base64 data from the custom attribute
 
-            console.log("ajax call?");
+            /*console.log("ajax call?");
             $.ajax({
             contentType: "application/json; charset=utf-8",
                 type: 'POST',
                 url: 'http://localhost:8000/tokengenrequest',
                 data: JSON.stringify({
-                    'image': `http://placekitten.com/g/200/300`
+                    'images': images //an array of image URLs
                         }),
                 success: processTokens
-                    });
-                });
+                    });*/
+        });
         
         function processTokens(tokens) {
             var tokensBox = document.querySelector(".tokens");
