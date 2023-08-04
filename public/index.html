@@ -11,7 +11,13 @@
             margin: 0;
             padding: 0;
         }
-
+        .header{
+            font-size: 30px;
+            font-weight: 600;
+            font-family: SF Pro Display,SF Pro Icons,AOS Icons,Helvetica Neue,Helvetica,Arial,sans-serif;
+            text-align:center;
+        }
+        
         .custom-container {
             max-width: 100%;
             margin: 0;
@@ -21,12 +27,12 @@
 
         /* Moodboard */
         .moodBoard-container {
-            max-height: 90vh;
-            overflow-y: auto;
+            height: 85vh;
             padding-left: 10px;
         }
 
         .moodBoard {
+            max-height: 80vh;
             border-radius: 20px;
             border: 5px solid #00008B;
             background: #ADD8E6;
@@ -38,15 +44,14 @@
         }
         .uploaded-image-container {
             position: relative;
-            width: 20%;
+            width: 30%;
             margin-right: 20px;
             margin-bottom: 40px;
             overflow: hidden;
         }
         .uploaded-image {
             width: 100%;
-            height: auto;
-            object-fit: cover;
+            height: 300px;
             border:3px solid black;
         }
         .delete-button {
@@ -84,6 +89,7 @@
             cursor: pointer;
             padding: 2px; 
             font-size: 10px; 
+            position:relative;
         }
         .token {
             border-radius: 0;
@@ -99,11 +105,11 @@
         .promptBar-container {
             display: flex;
             flex-wrap: wrap;
-            width: 100%;
+            width: 85%;
         }
 
         .promptBar {
-            border-radius: 20px;
+            border-radius: 0px;
             border: 5px solid black;
             height: 10vh;
             padding: 10px;
@@ -111,6 +117,7 @@
             flex-wrap: wrap;
             align-items: center;
             overflow-y:auto;
+            justify-content: flex-start;  /* Add this line */
         }
 
         .promptWord {
@@ -129,8 +136,9 @@
         /* Generated Image */
         .image {
             height: 47vh;
-            border: 3px solid black;
+            border: 0px solid black;
             margin-top: 20px;
+            object-fit: cover;
         }
 
         .saved {
@@ -166,59 +174,80 @@
             margin-left:10px;
             font-size:16px;
         }
+        .generate-button {
+            width: 14;
+            background-color: #008000;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            margin: 5px;
+            border-radius: 15px;   /* Rounded all corners */
+        }
+        .promptBar-and-button {
+            display: flex;
+            justify-content: space-between;  /* Space between the promptBar and the button */
+            align-items: center;  /* Center items vertically */
+        }
+    .button-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding-left: 700px;
+        padding-bottom: 10px;
+    }
+
+    .choose-file-button-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-left: 20px;
+    }
+
+    #generate-tokens-button {
+        cursor: pointer;
+        padding: 10px;
+        background-color: #008000;
+        color: white;
+        border-radius: 15px;
+        width: auto;  /* width as per the content and padding */
+    }
 
     </style>
 </head>
 
 <body>
-    <div class="container-fluid">
-        <div class="row ">
-            <div class="col-6 pl-0">
-                Moodboard
-                <div class="moodBoard-container">
-                    <div class="moodBoard" id="moodBoardContainer"></div>
-                    <button id='generate-tokens-button'>GENERATE TOKENS</button>
-                </div>
+<div class="container-fluid">
+    <div class="row ">
+        <div class="col-6 pl-0">
+            <div class="header">Moodboard</div>
+            <div class="moodBoard-container">
                 <div class="choose-file-button-container">
                     <label for="imageInput" class="choose-file-button">+</label>
                     <input type="file" id="imageInput" accept="image/*" onchange="showUserImage(event)">
                     <div class="choose-file-text">click to add your images</div>
                 </div>
+                <div class="button-container">
+                    <button id='generate-tokens-button'>GENERATE TOKENS</button>
+                </div>
+                <div class="moodBoard" id="moodBoardContainer"></div>
             </div>
-            <div class="col-4" style="margin:0px;">
-                Textbox
+        </div>
+            <div class="col-6" style="margin:0px;">
+                <div class="header">Token Bank</div>
                 <div class="tokens" style="margin-bottom: 20px;">
-
-                    <div class="token-container">
-                        <div class="token" onclick="addWordToPrompt('white rabbit')">white rabbit</div>
-                    </div>
-                    <div class="token-container">
-                        <div class="token" onclick="addWordToPrompt('with a rose')">with a rose</div>
-                    </div>
-                    <div class="token-container">
-                        <div class="token" onclick="addWordToPrompt('handsome')">handsome</div>
-                    </div>
-                    <div class="token-container">
-                        <div class="token" onclick="addWordToPrompt('beautiful')">beautiful</div>
-                    </div>
+                     <input id="customPromptInput" type="text" placeholder="Type your own">
                 </div>
-                <!-- Modify the promptBar container with the new class -->
                 <div class="promptBar" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <input id="customPromptInput" type="text" placeholder="Type your own">
-                    <div class="promptBar-container" id="promptBarContainer">
-                    </div>
-                </div>
-                  <button id='generate-button'>GENERATE IMAGE</button>
+                    <div class="promptBar-container" id="promptBarContainer"></div>
+                       </div>             
+                    <div id='generate-button' class="generate-button">GENERATE IMAGE</div> 
                 <div class="image" id="imageBox">
                     <div id="loading" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">Loading...</div> 
                 </div>
-                <button id='save-button'>SAVE IMAGE</button>
         </div>
-
-            <div class="col-2 pr-0">
-                Saved
-                <div class="saved"></div>
-            </div>
         </div>
     </div>
 
@@ -281,7 +310,7 @@
         imageElement.src = imageURL;
         imageElement.style.width = "100%";
         imageElement.style.height = "100%";
-        imageElement.style.objectFit = "fill";
+        imageElement.style.objectFit = "contain";
         document.getElementById("imageBox").innerHTML = '';
         document.getElementById("imageBox").appendChild(imageElement);
         isGenerating = false;
@@ -299,7 +328,7 @@
         /* Prompt */
         document.getElementById("customPromptInput").addEventListener("keypress", function(event) {
         if(event.key === "Enter"){
-        addWordToPrompt(event.target.value);
+        addWordToPrompt(event.target.value.trim());
         event.target.value = "";  // Clear the input box
         }   
         });
@@ -324,6 +353,8 @@
         }
 
         function addWordToPrompt(word) {
+            word=word.trim();
+            if(word!=="") {
             var promptWord = document.createElement("div");
             promptWord.classList.add("promptWord");
             promptWord.textContent = word;
@@ -333,6 +364,7 @@
 
             document.getElementById("promptBarContainer").appendChild(promptWord);
         }
+    }
 
         //set up filereader for reading uploaded images and adding to webpage. 
         var reader = new FileReader();
@@ -388,7 +420,7 @@
         }
 
        /* -- Token Generation -- */
-        $('#generate-tokens-button').click(function() {
+  /*      $('#generate-tokens-button').click(function() {
             for (let i = 0; i < processedImages.length; i++) {
                 var imageEntry = processedImages[i];
                 console.log("filename: " + imageEntry.name);
@@ -407,20 +439,37 @@
                     tokensBox.appendChild(tokenElement);
                 });
             }
+        });   */
+        $('#generate-tokens-button').click(function() {
+    for (let i = 0; i < processedImages.length; i++) {
+        var imageEntry = processedImages[i];
+        console.log("filename: " + imageEntry.name);
+        console.log("tokenString: " + imageEntry.tokenString);
+        var tokens = imageEntry.tokenString.split(',');
+        var tokensBox = document.querySelector(".tokens");
+        tokens.forEach(function(token) {
+            var tokenContainer = document.createElement("div");
+            tokenContainer.classList.add("token-container");
+
+            var tokenElement = document.createElement("div");
+            tokenElement.classList.add("token");
+            tokenElement.textContent = token.trim();  // Remove extra spaces
+            tokenElement.setAttribute("onclick", "addWordToPrompt('" + token.trim() + "')");
+
+            var deleteButton = document.createElement("div");
+            deleteButton.classList.add("delete-button");
+            deleteButton.innerHTML = "X";
+            deleteButton.addEventListener("click", function() {
+                tokenContainer.remove();
+            });
+
+            tokenContainer.appendChild(tokenElement);
+            tokenContainer.appendChild(deleteButton);
+            tokensBox.appendChild(tokenContainer);
         });
+    }
+});
 
-
-       /*$('#generate-tokens-button').click(function() {
-            //cycle through the images we've finished processing and process their tokens for adding to the token bank.  
-            //thought: hide/grey out this button while images are still processing? 
-
-            console.log("current list of images: ")
-            for (let i = 0; i < processedImages.length; i++){
-                console.log("filename: " + processedImages[i].name);
-                console.log("image: " + processedImages[i].image);
-                console.log("tokenString: " + processedImages[i].tokenString);
-            }
-        }) */       
     
         function processTokens(tokens) {
             var tokensBox = document.querySelector(".tokens");
